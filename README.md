@@ -1,7 +1,9 @@
-# Dev persona for Oh My Pi (omp) — anonymized public copy
+# omp-agent-persona — Dev persona for Oh My Pi (omp)
 
 Developer persona: SDD workflow (superpowers) + eng-gates quality gates,
 without corporate context. For home use with any model providers you have.
+
+This repo: https://github.com/spgsroot/omp-agent-persona
 
 ## What this is
 
@@ -43,6 +45,12 @@ omp plugin install @loneexile/omp-superpowers
 # 4. eng-gates tools (once, at first coding unit):
 bash skills/eng-gates/scripts/install-tools.sh --python --ub
 ```
+
+5. SDD infrastructure flags (in `~/.omp/agent/config.yml`): `task.enableLsp:
+   true`, `astGrep.enabled: true` (activate lsp/ast_grep in sdd-*
+   subagents), `task.enableEffort: true` (per-dispatch `effort: "hi"` for
+   high-risk reviews), `task.showResolvedModelBadge: true` (see which model
+   a seat actually ran). See AGENTS.md → "Tool matrix by stage".
 
 Requirements: Python ≥3.11 for gate.py (tomllib); uv recommended.
 
