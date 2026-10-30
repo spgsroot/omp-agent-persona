@@ -66,6 +66,34 @@
 - In a repo without code (pure yaml/config) eng-gates does not apply —
   then the review is done by `reviewer`/`security-reviewer`.
 
+### Tool matrix by stage (balanced, no excess)
+
+Principle: agent's work is validated by deterministic tools run locally by
+the agent; numbers are interpreted by the human or a reviewer agent, never
+"by eye". Profilers — only on suspicion, never in gates; mutation testing
+— targeted, not repo-wide.
+
+| Check | Rust | Python | JS/TS | Stage |
+|---|---|---|---|---|
+| Format/lint/types | rustfmt + clippy -D warnings | ruff (format+check) + pyright strict | eslint --max-warnings 0 + tsc --noEmit | fast |
+| Tests | cargo-nextest | pytest -q -x | vitest run | fast |
+| Module boundaries | workspace crates + cargo-deny (bans) | import-linter | dependency-cruiser | fast |
+| Dead code/deps | cargo-machete | deptry | knip | full |
+| Public API | cargo-semver-checks (published crates only) | — | api-extractor (libraries only) | full |
+| Complexity | clippy::cognitive_complexity | ruff C901/PLR091x | eslint complexity | fast (via linter) |
+| CRAP/duplication | crapper + dryer (ub set) | crapper + dryer | crapper + dryer | full, targeted |
+| Mutations | cargo-mutants OR mutator | mutmut OR mutator | Stryker OR mutator | full, targeted |
+| Microbenchmarks | divan (CodSpeed mode) OR criterion | pytest-codspeed OR pytest-benchmark | tinybench | full, hot-path only |
+| Profiling (never a gate) | flamegraph, DHAT, samply | py-spy, scalene, memray | node --cpu-prof | on suspicion |
+
+Balance rules: `fast` (90% of units) = format+lint+types+tests+boundaries.
+`full` before done = + dead code, semver (published), CRAP/mutate on the
+riskiest file (not the whole repo), benchmarks only when the unit touched
+a hot path. Wall-clock on a noisy machine is not a gate; deterministic
+counters are (CodSpeed simulation / gungraun / saved baseline + budget).
+Don't stack linters: ruff covers py format+lint+complexity; eslint covers
+ts.
+
 ## Token discipline (paid / metered models)
 
 - Turn count beats token price: cheap models often take 2–3× turns on
