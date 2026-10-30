@@ -1,0 +1,10 @@
+# PROTECTED. Thresholds for lints enabled in Cargo.toml [workspace.lints.clippy].
+cognitive-complexity-threshold = 15
+too-many-arguments-threshold = 5
+too-many-lines-threshold = 80
+type-complexity-threshold = 250
+excessive-nesting-threshold = 4
+# Tests may unwrap; library code may not.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true

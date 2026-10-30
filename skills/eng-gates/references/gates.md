@@ -1,0 +1,100 @@
+# Gate reference
+
+Each check: what it catches, the command it runs, how to read a failure, the usual real fix.
+Tier `fast` runs on every unit of work; `full` adds the slow ones. Scope is files changed since the merge-base
+with `gate.base` (default `origin/main`), plus staged, unstaged and untracked files. `--all` = whole tree.
+
+## Guards (all languages, fast)
+
+### guard.config
+Fails when a protected file or section differs from the base: `gates.toml`, `tools/eng-gates/**`, `clippy.toml`,
+`deny.toml`, `rustfmt.toml`, `rust-toolchain.toml`, `ruff.toml`, `.importlinter`, `tach.toml`, `pyrightconfig.json`,
+`mypy.ini`, `.coveragerc`, `eslint.config.*`, `.dependency-cruiser.*`, `knip.json`, `.size-limit.*`, `tsconfig*.json`,
+`vitest.config.*`, `jest.config.*`, benchmark baselines, CI workflows, `.pre-commit-config.yaml`;
+`Cargo.toml` `[lints]` / `[workspace.lints]` / `[profile]`; `pyproject.toml` `[tool.ruff|mypy|pyright|importlinter|pytest|coverage|deptry|tach]`;
+`package.json` `eslintConfig`, `size-limit`, `knip`, `scripts.test|lint|typecheck`.
+Sections are compared as parsed data, so reformatting `pyproject.toml` or adding a dependency does not trip it.
+Fix: revert. A human who agrees with the change runs `gate.py approve` (records hashes in `.gates/approved.json`,
+ignored when `CI` is set) or commits it to the base branch.
+
+### guard.suppress
+Scans added lines for new suppressions:
+- Rust: `#[allow(..)]`, `#[expect(..)]`, `#![allow]`, `#[ignore]`, `cfg_attr(.., allow)`
+- Python: `# noqa`, `# type: ignore`, `# pyright: ignore`, `# pragma: no cover`, `pytest.mark.skip|xfail`, `pytest.skip(`
+- JS/TS: `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `.skip(`, `istanbul|c8|v8 ignore`, `as any`
+- Always fails: `.only(`, `fdescribe(`, `fit(`
+A line that also contains `gate-allow: <reason>` becomes a WARN listed for the reviewer instead of a FAIL.
+
+## Rust
+
+| id | tier | command | notes |
+|---|---|---|---|
+| rust.fmt | fast | `cargo fmt --all --check` | fix: `cargo fmt --all` |
+| rust.clippy | fast | `cargo clippy --workspace --all-targets --all-features -- -D warnings` | lints from `Cargo.toml` `[workspace.lints]`, thresholds in `clippy.toml` |
+| rust.test | fast | `cargo nextest run` (falls back to `cargo test`) | nextest isolates tests per process: flaky shared state shows up |
+| rust.deny | full | `cargo deny check` | advisories, licenses, banned crates, unknown sources |
+| rust.machete | full | `cargo machete` | unused dependencies |
+| rust.semver | full, off | `cargo semver-checks` | turn on for published crates |
+| rust.bench | full, off | your `cmd`, e.g. `cargo bench --bench hot_paths` | gungraun regression limits make `cargo bench` exit non-zero |
+
+Clippy lints that matter most for extensibility: `cognitive_complexity`, `too_many_lines`, `too_many_arguments`,
+`type_complexity`, `excessive_nesting`, `large_enum_variant`. For performance: `redundant_clone`, `large_futures`,
+`needless_collect`, `large_types_passed_by_value`, `trivially_copy_pass_by_ref`, `inefficient_to_string`.
+`unwrap_used` / `expect_used` / `panic` fail in library code and are allowed in tests (`clippy.toml`).
+
+## Python
+
+| id | tier | command | notes |
+|---|---|---|---|
+| py.format | fast | `ruff format --check <changed .py>` | fix: `ruff format` |
+| py.lint | fast | `ruff check <changed .py>` | `ruff check --fix` for safe autofixes, then read what is left |
+| py.types | fast | `pyright` (or `mypy .`) | runs on the project, not only changed files |
+| py.test | fast | `pytest -q -x` | stops at the first failure |
+| py.imports | fast | `lint-imports` (or `tach check`) | contracts in `.importlinter` |
+| py.deps | full | `deptry .` | missing, unused, transitive-only dependencies |
+| py.bench | full, off | `pytest benches --benchmark-only --benchmark-compare=<id> --benchmark-compare-fail=mean:5%` | save a baseline first with `--benchmark-save` |
+
+Ruff rule groups chosen for extensibility: `C90` (complexity 10), `PL` (args 5, branches 10, statements 40,
+nesting 4), `FBT` (boolean flags in signatures), `ARG`, `ANN` (typed public API), `TID` (absolute imports).
+For performance and serving code: `PERF`, `ASYNC` (blocking calls such as `time.sleep` or sync HTTP inside
+`async def`), `B`. `T20` keeps `print` out of library code.
+
+import-linter contract types: `layers` (higher may import lower only), `forbidden` (domain must not import
+providers / frameworks), `independence` (adapters do not know each other).
+Tach is an alternative; the original gauge-sh repository is unmaintained, development continues in the tach-org fork.
+
+## JS / TS
+
+| id | tier | command | notes |
+|---|---|---|---|
+| ts.types | fast | `tsc --noEmit -p .` | extend `tsconfig.strict.json` |
+| ts.lint | fast | `eslint --max-warnings 0 <changed files>` | type-aware rules need `parserOptions.projectService` |
+| ts.test | fast | `vitest run` (or `jest --ci`) | |
+| ts.deps | fast | `depcruise src --config .dependency-cruiser.cjs` | cycles, layers, adapter independence, dev deps in runtime code |
+| ts.knip | full | `knip` | unused files, exports, dependencies |
+| ts.size | full | `size-limit` | only when `.size-limit.*` exists (libraries, frontends) |
+| ts.bench | full, off | your `cmd` | pair with `bench_compare.py` |
+
+`verbatimModuleSyntax` in `tsconfig.strict.json` requires ESM (`"type": "module"`) or explicit `.cts` files;
+drop it for CommonJS packages. `exactOptionalPropertyTypes` is the strictest flag; legacy code may need it off.
+
+## Uncle Bob's tools (ub-mode), full tier, all three languages
+
+| id | command | fails when |
+|---|---|---|
+| ub.crap | `crapper --changed --threshold 10` | exit 2: worst CRAP among analysed functions above threshold |
+| ub.dry | `dryer --changed --threshold 0.8` | any `DUPLICATE score=` line (dryer itself always exits 0; the runner parses it) |
+| ub.mutate | `mutator --changed` | exit 3: a mutant survived; exit 2: baseline tests fail |
+
+CRAP = CC² × (1 − coverage)³ + CC. A function with complexity 4 and no tests scores 20; the same function fully
+covered scores 4. Lower it by testing branches, splitting the function, or both.
+crapper and mutator generate coverage themselves (cargo-llvm-cov, coverage.py, vitest/c8) and may install those
+tools when missing. A failed test run is scored as 0% coverage: if every function suddenly has CRAP = CC² + CC,
+fix the test run first. `--changed` analyses whole changed files, so an old complex function next to your edit
+can fail the gate: split it (boy-scout rule) or ask whether to scope it out.
+mutator runs every covered mutant on its first run; later runs are differential. Start on one file.
+
+## Exit codes
+
+`gate.py`: 0 no failures, 1 a check failed, 2 usage or config error. `bench_compare.py`: 0 within budget,
+1 regression or missing benchmark, 2 bad input.

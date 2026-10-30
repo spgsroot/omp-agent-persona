@@ -1,0 +1,53 @@
+# PROTECTED. Standalone ruff config (takes precedence over [tool.ruff] in pyproject.toml).
+line-length = 100
+target-version = "py311"
+extend-exclude = ["**/generated/**", "**/*_pb2.py"]
+
+[lint]
+select = [
+  "E", "W", "F",      # pycodestyle, pyflakes
+  "I",                # import order
+  "B",                # bugbear: likely bugs
+  "UP",               # pyupgrade
+  "SIM", "RET",       # simpler control flow
+  "C90",              # mccabe complexity
+  "PL",               # pylint: size limits, refactor hints
+  "PERF",             # performance anti-patterns
+  "ASYNC",            # blocking calls inside async code (serving paths)
+  "RUF",
+  "PT",               # pytest style
+  "TID",              # import rules
+  "ARG",              # unused arguments
+  "BLE",              # blind except
+  "S",                # bandit security
+  "T20",              # print() in library code
+  "FBT",              # boolean positional args (hurt extension)
+  "ANN",              # type annotations on public API
+]
+ignore = [
+  "ANN401",           # Any is sometimes the honest type at boundaries
+  "PLR2004",          # magic numbers: too noisy for numeric/ML code
+  "S311",             # random is fine outside crypto
+  "E501",             # formatter owns line length
+]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pylint]
+max-args = 5
+max-branches = 10
+max-returns = 4
+max-statements = 40
+max-nested-blocks = 4
+
+[lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "ANN", "PLR2004", "ARG", "FBT"]
+"benches/**" = ["S101", "ANN", "T20"]
+"scripts/**" = ["T20"]
+
+[format]
+docstring-code-format = true

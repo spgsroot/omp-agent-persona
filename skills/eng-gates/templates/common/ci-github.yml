@@ -1,0 +1,34 @@
+# Copy to .github/workflows/gates.yml (a human does this; workflows are protected).
+# CI=1 makes missing tools fail and ignores local approvals.
+name: gates
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # merge-base with origin/main needs history
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt, llvm-tools-preview
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        if: hashFiles('package-lock.json') != ''
+      - run: uv sync --all-extras --dev
+        if: hashFiles('uv.lock') != ''
+      - run: bash tools/eng-gates/install-tools.sh
+      - run: python3 tools/eng-gates/gate.py full --base origin/${{ github.base_ref || 'main' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gates-report
+          path: .gates/last.json

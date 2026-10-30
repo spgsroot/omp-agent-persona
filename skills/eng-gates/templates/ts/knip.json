@@ -1,0 +1,5 @@
+{
+  "entry": ["src/index.ts", "src/main.ts", "benches/**/*.mjs"],
+  "project": ["src/**/*.ts", "benches/**/*.mjs"],
+  "ignoreExportsUsedInFile": true
+}

@@ -1,0 +1,38 @@
+# Merge into the root Cargo.toml (PROTECTED section). For a single crate use [lints.rust] / [lints.clippy];
+# for a workspace keep [workspace.lints.*] here and put `[lints] workspace = true` in every member crate.
+# The gate runs clippy with -D warnings, so every "warn" below fails the gate.
+
+[workspace.lints.rust]
+unsafe_code = "deny"                 # LLMOps FFI/SIMD crates: switch to "warn" there and document each block
+unused_must_use = "deny"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+# correctness, suspicious, style, complexity and perf groups are on by default.
+# --- extensibility: keep functions and types small enough to change safely
+cognitive_complexity = "warn"        # threshold in clippy.toml
+too_many_lines = "warn"
+too_many_arguments = "warn"
+type_complexity = "warn"
+excessive_nesting = "warn"
+large_enum_variant = "warn"
+# --- robustness: no panics in library paths
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+todo = "warn"
+unimplemented = "warn"
+dbg_macro = "warn"
+print_stdout = "warn"                # services log through tracing, not println
+# --- performance
+redundant_clone = "warn"
+large_futures = "warn"               # huge futures cost memcpy on every poll
+large_stack_arrays = "warn"
+needless_collect = "warn"
+inefficient_to_string = "warn"
+trivially_copy_pass_by_ref = "warn"
+large_types_passed_by_value = "warn"
+manual_memcpy = "warn"
+format_push_string = "warn"
+# Optional, much stricter (start here on new crates):
+# pedantic = { level = "warn", priority = -1 }

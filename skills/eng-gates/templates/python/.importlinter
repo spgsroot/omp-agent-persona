@@ -1,0 +1,41 @@
+# PROTECTED. import-linter contracts; run `lint-imports`.
+# Higher layers may import lower ones, never the reverse. Rename the layers to your packages.
+
+[importlinter]
+root_package = {{package}}
+include_external_packages = True
+
+[importlinter:contract:layers]
+name = Layers: api -> service -> domain
+type = layers
+layers =
+    {{package}}.api
+    {{package}}.service
+    {{package}}.domain
+# Layers that do not exist yet are not an error:
+exhaustive = False
+
+[importlinter:contract:domain-pure]
+name = Domain does not touch frameworks or providers
+type = forbidden
+source_modules =
+    {{package}}.domain
+forbidden_modules =
+    fastapi
+    httpx
+    requests
+    sqlalchemy
+    openai
+    anthropic
+    vllm
+    torch
+allow_indirect_imports = True
+
+# Plug-in style extension: adapters do not know each other.
+# [importlinter:contract:adapters-independent]
+# name = Provider adapters are independent
+# type = independence
+# modules =
+#     {{package}}.adapters.openai
+#     {{package}}.adapters.anthropic
+#     {{package}}.adapters.vllm
