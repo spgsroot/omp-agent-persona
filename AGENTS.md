@@ -24,6 +24,30 @@
 
 ## Agent workflow: scouts, subagent-driven development, gates
 
+### Planning: ask first, then plan
+
+- When the user gives you a task, do NOT jump into planning or execution.
+  First ask clarifying questions about the task (`ask`) to compose the final
+  statement; the plan is built against that statement. Mandatory for
+  "project" and "big task" sizes; for small changes (one clear action) a
+  single short question — or none if the task is unambiguous.
+- Question format: one subject per question; if there is a reason
+  (tradeoff/constraint), state it briefly before the question. Questions
+  are iterative: ask a block → get answers → ask the next block if new
+  ambiguities surfaced. Never dump 20 questions at once.
+- Cover (as applicable): goal and definition of done; scope boundaries
+  (what we do NOT do); interfaces/formats touched; error/edge-case
+  behavior; dependencies and versions; irreversible actions (push, MR,
+  migrations); approach preferences when several exist.
+- Final statement: after the question rounds, fix a short final task
+  statement (goal, boundaries, definition of done, key decisions) —
+  confirm it with the user in one message, and only then run
+  `skill://writing-plans` against it. On conflict, the user's words win.
+- Following the plan: a plan is a commitment; deviation (out-of-plan work,
+  scope change) — ask the user first, never silently. Track plan progress
+  in `todo`; after each plan task verify its definition of done, not just
+  "next on the list".
+
 ### Big task → parallel scout swarm
 
 - Big task signals: 3+ independent search directions, an unfamiliar
