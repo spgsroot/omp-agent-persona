@@ -13,17 +13,17 @@ Runner: `python3 tools/eng-gates/gate.py` inside a repo that ran `init`, otherwi
 ## Loop
 
 1. Make one small change (one test, one function, one refactor step).
-2. `gate.py fast` — seconds. Format, lint, types, tests, module boundaries, both guards. Changed files only.
+2. `gate.py fast` - seconds. Format, lint, types, tests, module boundaries, both guards. Changed files only.
 3. Red: fix the first failure, rerun. Do not start the next unit while fast is red.
 4. Unit done → commit (why, what, how it was proven).
-5. Before saying "done", before review, before push: `gate.py full` — adds dependency audit, unused deps,
+5. Before saying "done", before review, before push: `gate.py full` - adds dependency audit, unused deps,
    CRAP, duplication, mutation, benchmarks, bundle size.
 6. Report: paste the final summary line of `gate full`, and list every `WARN guard.suppress` entry.
 
 Output: one line per check, then the tail of each failure. The full report is in `.gates/last.json`;
 read it instead of rerunning. `--json` prints it. `--only rust,guard` runs a subset. `--all` checks the whole tree.
 
-## Fixing failures — what is and is not allowed
+## Fixing failures - what is and is not allowed
 
 | Failure | Fix | Never |
 |---|---|---|
@@ -56,11 +56,11 @@ Details per tool, and how to read each output: `references/gates.md`.
 
 ## Setting up a repo (human-assisted)
 
-1. `python3 <skill>/scripts/gate.py init` — copies templates (never overwrites without `--force`), vendors the
+1. `python3 <skill>/scripts/gate.py init` - copies templates (never overwrites without `--force`), vendors the
    runner into `tools/eng-gates/` for CI, adds `.gates/` state to `.gitignore`, prints manual merge steps.
-2. `bash <skill>/scripts/install-tools.sh` — installs missing tools for the detected languages and clones
+2. `bash <skill>/scripts/install-tools.sh` - installs missing tools for the detected languages and clones
    crapper / dryer / mutator into `~/.local/share/eng-gates/ub`.
-3. `gate.py doctor` — every check: `ok` (tool path), `MISS` (install it), `--` (not configured), `off`.
+3. `gate.py doctor` - every check: `ok` (tool path), `MISS` (install it), `--` (not configured), `off`.
 4. Legacy code: run `gate.py full --all` once to see the debt, then keep the default changed-files scope so
    only touched code must meet the bar. Never lower thresholds to make the first run green; scope instead.
 5. A human reviews and commits the config. CI runs `gate.py full` with `CI=1` (missing tools fail, local

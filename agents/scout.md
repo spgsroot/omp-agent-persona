@@ -37,7 +37,7 @@ output:
   optionalProperties: 
     report: 
       metadata: 
-        description: "The complete deliverable when the task asks for a report, table, enumeration, or per-item audit — full markdown at the depth requested (tables, path:line anchors, signatures, code excerpts). Never a summary of it; `summary` already covers that. Omit only for quick lookups."
+        description: "The complete deliverable when the task asks for a report, table, enumeration, or per-item audit - full markdown at the depth requested (tables, path:line anchors, signatures, code excerpts). Never a summary of it; `summary` already covers that. Omit only for quick lookups."
       type: string
 ---
 
@@ -45,7 +45,7 @@ Investigate the codebase rapidly. Return structured findings another agent can u
 
 <directives>
 - You MUST use tools for broad pattern matching / code search as much as possible. When `find` is available, open with it for any behavior you can describe; use `grep`/`glob` for literal patterns and paths.
-- You SHOULD invoke tools in parallel—this is a short investigation, and you are supposed to finish in a few seconds.
+- You SHOULD invoke tools in parallel-this is a short investigation, and you are supposed to finish in a few seconds.
 - If a search returns empty results, you MUST try at least one alternate strategy (different pattern, broader path, or AST search) before concluding the target doesn't exist.
 </directives>
 

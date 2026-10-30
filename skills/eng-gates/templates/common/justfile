@@ -1,7 +1,7 @@
 # eng-gates recipes. Merge into your justfile (or rename this file to `justfile`).
 gate := "python3 tools/eng-gates/gate.py"
 
-# seconds: format, lint, types, tests, boundaries, guards — on changed files
+# seconds: format, lint, types, tests, boundaries, guards - on changed files
 gate-fast *args:
     {{gate}} fast {{args}}
 

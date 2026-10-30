@@ -80,12 +80,12 @@ Bash read-only: `git diff`, `git log`, `git show`, `jj diff --git`, `gh pr diff`
 
 <criteria>
 Report only issues meeting ALL:
-- **Provable impact** — specific affected code paths; no speculation.
-- **Actionable** — discrete fix, not vague "consider improving X".
-- **Unintentional** — clearly not deliberate design choice.
-- **Introduced in patch** — don't flag pre-existing bugs.
-- **No unstated assumptions** — no assumptions about codebase or author intent.
-- **Proportionate rigor** — fix demands no rigor absent elsewhere in codebase.
+- **Provable impact** - specific affected code paths; no speculation.
+- **Actionable** - discrete fix, not vague "consider improving X".
+- **Unintentional** - clearly not deliberate design choice.
+- **Introduced in patch** - don't flag pre-existing bugs.
+- **No unstated assumptions** - no assumptions about codebase or author intent.
+- **Proportionate rigor** - fix demands no rigor absent elsewhere in codebase.
 </criteria>
 
 <cross-boundary>

@@ -19,7 +19,7 @@ The original corporate setup was ≈ 8k+.
 Levers:
 - Trim AGENTS.md (done here: 4.6k → 1.9k).
 - The bootstrap is plugin-owned; disabling the extension kills the SDD
-  skill-discovery guidance too — not recommended for the dev persona.
+  skill-discovery guidance too - not recommended for the dev persona.
 - Skill descriptions: add names to `ignoredSkills` for skills you never
   use; each saves its description line (~100 tokens avg).
 
@@ -38,7 +38,7 @@ Levers:
 
 Multiplied by turn count. The upstream fork's measurement on a real fix
 re-review: grok-4.6 seat 9.7 min / 4 turns; sonnet-5 50 s / 1 turn;
-DeepSeek flash 100 s / 4 turns — same verdict. **Cheap-but-chatty models
+DeepSeek flash 100 s / 4 turns - same verdict. **Cheap-but-chatty models
 lose money on multi-step work.**
 
 ## Levers ranked by impact
@@ -46,11 +46,11 @@ lose money on multi-step work.**
 1. **Turn count (model choice per seat).** Map `task.agentModelOverrides`
    to YOUR models with a real thinking ladder. Floor for
    sdd-reviewer/sdd-implementer: a mid-tier model. rereviewer can run
-   cheap+low (verdict-only work over a small diff). escalation/final —
+   cheap+low (verdict-only work over a small diff). escalation/final -
    your strongest, they run once per plan/stuck task.
 2. **Brief hygiene.** One task, its interfaces, global constraints.
    The upstream skill ships scripts (`task-brief`) that extract exactly
-   one task's text — use them; never paste plan history.
+   one task's text - use them; never paste plan history.
 3. **Report-file contract.** Implementers write full reports to a file and
    return ≤12 lines; the controller reads files/`agent://<id>` fields
    only when needed. Never echo full results into chat.
@@ -59,11 +59,11 @@ lose money on multi-step work.**
    batch small same-shape edits into one brief.
 5. **Compaction.** omp auto-compacts at threshold; each compaction re-pays
    the static prompt + bootstrap (~1.4k). Long sessions with many small
-   tasks lose more to compaction cycles than to the work itself — prefer
+   tasks lose more to compaction cycles than to the work itself - prefer
    finishing a task to a ledger line and starting fresh dispatches.
 6. **`read.summarize`** (omp config): plain `read` summarizes large code
    files to declarations; the SDD seats set `readSummarize: false` because
-   they edit what they read. Keep that — a reviewer that missed a hunk
+   they edit what they read. Keep that - a reviewer that missed a hunk
    costs a re-review round (3–5× more than the saved tokens).
 
 ## Home-model mapping template
@@ -79,6 +79,6 @@ task:
 ```
 
 Use exact catalog ids (`omp models ls <provider>`) and only levels the
-model offers — unsupported levels are silently clamped, collapsing the
+model offers - unsupported levels are silently clamped, collapsing the
 ladder. An override replaces the whole model list, hence the `,@task` /
 `,@slow` fallback suffix.

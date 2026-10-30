@@ -6,7 +6,7 @@ all-features = true
 
 [advisories]
 yanked = "deny"
-ignore = []                     # each entry: { id = "RUSTSEC-...", reason = "..." } — human decision only
+ignore = []                     # each entry: { id = "RUSTSEC-...", reason = "..." } - human decision only
 
 [licenses]
 allow = [
