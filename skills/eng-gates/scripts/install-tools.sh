@@ -33,6 +33,14 @@ fi
 run() { echo "+ $*"; [ "$DRY" = 1 ] || "$@"; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    if [ "$DO_UB" = 1 ]; then
+      echo "skip ub: crapper/dryer/mutator launchers are POSIX-only (hard-coded .venv/bin); gate.py reports them as missing on Windows"
+      DO_UB=0
+    fi ;;
+esac
+
 if [ "$DO_RUST" = 1 ]; then
   have cargo || { echo "cargo not found: install rustup first" >&2; exit 1; }
   for crate in cargo-nextest cargo-deny cargo-machete cargo-semver-checks cargo-llvm-cov; do

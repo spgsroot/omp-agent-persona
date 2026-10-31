@@ -9,6 +9,8 @@ Gates decide when code is done. You do not. A task is finished only when `gate f
 
 Runner: `python3 tools/eng-gates/gate.py` inside a repo that ran `init`, otherwise
 `python3 <this skill>/scripts/gate.py`. Add `-C <dir>` to point at another project.
+Windows: `python3` is the Microsoft Store stub - substitute `python` (or `uv run python`) everywhere below;
+the ub checks (`ub.crap`, `ub.dry`, `ub.mutate`) are unavailable there and report as a missing tool.
 
 ## Loop
 

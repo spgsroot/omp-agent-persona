@@ -247,7 +247,10 @@ def resolve_tool(root: Path, tool: str, cfg: dict) -> str | None:
         p = Path(os.path.expanduser(tools_cfg[tool]))
         p = p if p.is_absolute() else root / p
         return str(p) if p.exists() else None
+    nt = os.name == "nt"
     if tool in ("crapper", "dryer", "mutator"):
+        if nt:  # the ub launchers are POSIX sh scripts with a hard-coded .venv/bin: unusable on Windows
+            return None
         ub_dir = Path(os.path.expanduser(tools_cfg.get("ub_dir", os.environ.get(
             "ENG_GATES_UB_DIR", "~/.local/share/eng-gates/ub"))))
         p = ub_dir / tool / tool
@@ -256,9 +259,12 @@ def resolve_tool(root: Path, tool: str, cfg: dict) -> str | None:
         return shutil.which(tool)
     if tool.startswith("cargo-"):
         return shutil.which(tool)
-    for local in (root / "node_modules" / ".bin" / tool, root / ".venv" / "bin" / tool):
-        if local.exists():
-            return str(local)
+    # Windows: npm shims are tool.cmd (the extensionless file is a sh script), venvs use Scripts/.
+    venv_bin = root / ".venv" / ("Scripts" if nt else "bin")
+    for name in ((tool + ".cmd", tool + ".exe") if nt else (tool,)):
+        for local in (root / "node_modules" / ".bin" / name, venv_bin / name):
+            if local.exists():
+                return str(local)
     return shutil.which(tool)
 
 

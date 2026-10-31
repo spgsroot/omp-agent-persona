@@ -24,13 +24,13 @@
 
 ## Agent workflow: scouts, subagent-driven development, gates
 
-### Planning: ask first, then plan
+### Planning: resolve from context, ask the rest, then plan
 
-- When the user gives you a task, do NOT jump into planning or execution.
-  First ask clarifying questions about the task (`ask`) to compose the final
-  statement; the plan is built against that statement. Mandatory for
-  "project" and "big task" sizes; for small changes (one clear action) a
-  single short question - or none if the task is unambiguous.
+- Before planning, resolve what the repo, docs and tools can answer
+  yourself - never ask the user for facts a `read`/`grep`/search gives.
+  Then `ask` only what remains: intent, scope, tradeoffs, irreversible
+  steps. Projects / big tasks: at least one question round before the
+  plan; small unambiguous changes: no questions.
 - Question format: one subject per question; if there is a reason
   (tradeoff/constraint), state it briefly before the question. Questions
   are iterative: ask a block → get answers → ask the next block if new
@@ -78,45 +78,21 @@
 
 - After each solved task in a code repo (before "done", before review,
   before push): `skill://eng-gates` → `gate fast` per work unit, `gate
-  full` before "done". Skill lives in `skills/eng-gates/` of this
-  persona repo (copy into `~/.omp/agent/skills/eng-gates` to install).
+  full` before "done". Install: copy `skills/eng-gates/` of this persona
+  repo into `~/.omp/agent/skills/eng-gates` (`<skill>` below).
 - Run gate.py with Python ≥3.11 (tomllib): `uv` python recommended;
-  a system 3.9 will fail with `No module named 'tomllib'`.
-- Uninitialized repo: `python3 <skill>/scripts/gate.py -C <repo>`;
+  a system 3.9 will fail with `No module named 'tomllib'`. Windows:
+  `python3` is the Microsoft Store stub - use `python` / `uv run python`.
+- Uninitialized repo: `python3 <skill>/scripts/gate.py fast -C <repo>`;
   `init` in a repo - only with the user's consent (it writes files into
   the repo). Report: the final summary line of `gate full` + every WARN
   `guard.suppress` entry. Never lower thresholds to go green; scope, not
   the gate, is what you adjust.
 - In a repo without code (pure yaml/config) eng-gates does not apply -
   then the review is done by `reviewer`/`security-reviewer`.
-
-### Tool matrix by stage (balanced, no excess)
-
-Principle: agent's work is validated by deterministic tools run locally by
-the agent; numbers are interpreted by the human or a reviewer agent, never
-"by eye". Profilers - only on suspicion, never in gates; mutation testing
-- targeted, not repo-wide.
-
-| Check | Rust | Python | JS/TS | Stage |
-|---|---|---|---|---|
-| Format/lint/types | rustfmt + clippy -D warnings | ruff (format+check) + pyright strict | eslint --max-warnings 0 + tsc --noEmit | fast |
-| Tests | cargo-nextest | pytest -q -x | vitest run | fast |
-| Module boundaries | workspace crates + cargo-deny (bans) | import-linter | dependency-cruiser | fast |
-| Dead code/deps | cargo-machete | deptry | knip | full |
-| Public API | cargo-semver-checks (published crates only) | - | api-extractor (libraries only) | full |
-| Complexity | clippy::cognitive_complexity | ruff C901/PLR091x | eslint complexity | fast (via linter) |
-| CRAP/duplication | crapper + dryer (ub set) | crapper + dryer | crapper + dryer | full, targeted |
-| Mutations | cargo-mutants OR mutator | mutmut OR mutator | Stryker OR mutator | full, targeted |
-| Microbenchmarks | divan (CodSpeed mode) OR criterion | pytest-codspeed OR pytest-benchmark | tinybench | full, hot-path only |
-| Profiling (never a gate) | flamegraph, DHAT, samply | py-spy, scalene, memray | node --cpu-prof | on suspicion |
-
-Balance rules: `fast` (90% of units) = format+lint+types+tests+boundaries.
-`full` before done = + dead code, semver (published), CRAP/mutate on the
-riskiest file (not the whole repo), benchmarks only when the unit touched
-a hot path. Wall-clock on a noisy machine is not a gate; deterministic
-counters are (CodSpeed simulation / gungraun / saved baseline + budget).
-Don't stack linters: ruff covers py format+lint+complexity; eslint covers
-ts.
+- Which tool per language and stage (fast / full / targeted / never a
+  gate): `skill://eng-gates/references/gates.md` → "Stage matrix". Read it
+  when choosing checks; don't stack linters, profilers are never gates.
 
 ## Token discipline (paid / metered models)
 

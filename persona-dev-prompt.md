@@ -1,7 +1,5 @@
 # Developer persona: explicit permissions layered over AGENTS.md rules.
-# Loaded into the system prompt via `--append-system-prompt` by
-# scripts/omp-dev.sh. NOTE: comments in the YAML overlay are NOT visible
-# to the agent - behavioral rules must live in this file.
+# `<skill>` = ~/.omp/agent/skills/eng-gates. Windows: `python`, not `python3` (Store stub).
 
 ## Allowed in this persona
 

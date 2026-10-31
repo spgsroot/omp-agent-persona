@@ -1,0 +1,2 @@
+# Shell scripts must stay LF: with core.autocrlf=true (Git for Windows default) bash fails on `$'\r'`.
+*.sh text eol=lf
